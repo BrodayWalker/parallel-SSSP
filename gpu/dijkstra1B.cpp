@@ -1,7 +1,7 @@
 //***************************************************************************
 //  Broday Walker
 //  Dr. Eduardo Colmenares
-//  
+//   
 //
 //***************************************************************************
 
@@ -16,61 +16,50 @@ using namespace std;
 const int GRID_X = 1; // Number of blocks in the grid on the x-axis 
 const int BLOCK_X = 7; // Number of threads on the x-axis per block
 const int BILLION = 1000000000; // Used as a substitute for the value of infinity
-const int SIZE = 49; // Just for testing
+const int SIZE = 49; // The size of the adjacency matrix (WIDTH * WIDTH)
+const int WIDTH = 7; // Number of vertices in the graph
 
+// Hold the adjacency matrix in constant memory on the device as it will not be
+// modified over the lifetime of the program
 __constant__ int adjMat_d[SIZE];
 
-__global__ void dijkstra(int *adj_d, int *dist_d, int *parent_d, int s, int width)
+__global__ void dijkstra_helper(int *dist_d, int *parent_d, int s, int width)
 {   
-    printf("Adjacency matrix from the device\n");
-    // Print the adjacency matrix for testing
-    for(int i = 0; i < width; i++)
-    {
-        printf("Row %d: ", i);
+    int tid_x = threadIdx.x;
+    int block_x = blockIdx.x;
+    int grid_x = dimGrid.x;
 
-        for(int k = 0; k < width; k++)
-            printf("{%d} ", adj_d[i * width + k]);
 
-        printf("\n");
-    }
-    printf("\n\n");
+
+
 }
 
+// A kernel for testing if the adjacency matrix was actually copied to the constant
+// memory on the device
 __global__ void printAdjMat(int *test, int width)
 {
-    if(threadIdx.x == 0)
-        printf("Invoked\n");
-
-    int tid = threadIdx.x;
+    int tid_x = threadIdx.x;
     
-    
-    for(int i = 0; i < 7; i++)
-        test[i * width + tid] = adjMat_d[i * width + tid] + 1;
+    for(int i = 0; i < width; i++)
+        test[i * width + tid_x] = adjMat_d[i * width + tid_x];
 }
 
 int main()
 {
+    // Host Declarations
     int num_edges, adj_size, dist_size, parent_size, start, end, width;
-    // Host arrays
     int *adjMat, *dist, *parent;
+    
+    // Priority queue
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
 
-
-    // Delete from here
-    int *test_cpy, *test_cpy_d; //
-    test_cpy = new int[49];     //
-                                //
-    for(int i = 0; i < 49; i++) //
-        test_cpy[i] = 0;        //
-    // Delete to here
-
-    // Device arrays
+    // Device declarations
     int *adj_d, *dist_d, *parent_d;
 
     // For error checking
     cudaError_t cudaErr;
 
-    // Read in the number of vertices
-    cin >> width;
+    width = WIDTH;
 
     // This is a linearized adjacency matrix
     adjMat = new int[width * width];
@@ -82,22 +71,23 @@ int main()
     dist_size = width * sizeof(int); // Equal to the number of vertices
     parent_size = width * sizeof(int);
 
-    // Fill arrays with 0s
+    // Fill the adjacency-matrix with 0s
     for(int i = 0; i < width * width; i++)
         adjMat[i] = 0;
 
+    // A vertex does not have a parent if its value is -1 (after running 
+    // Dijkstra's algorithm, this will only be true for the starting vertex).
     for(int i = 0; i < width; i++)
     {
-        dist[i] = 0;
-        parent[i] = BILLION;
+        dist[i] = BILLION;
+        parent[i] = -1;
     }
 
     // Manually set the starting and end vertices
     start = 1;
-    dist[start] = 0; // Distance from the start vertex to the start vertex is always 0
-    parent[start] = -1; // -1 is used to signal no parent
+    // Distance from the start vertex to the start vertex is always 0
+    dist[start] = 0; 
     end = 7;
-
 
     // Fill the adjacency matrix with data
     for(int i = 0; i < width; i++)
@@ -122,6 +112,8 @@ int main()
     }
 
     // Print weights for testing
+    printf("Test print of all weights: \n");
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     for(int i = 0; i < width; i++)
     {
         cout << "Row " << i << ": ";
@@ -130,10 +122,12 @@ int main()
             cout << "{" << adjMat[i * width + j] << "} ";
         cout << '\n';
     }
+    printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     cout << "\n\n";
         
     // Copy the adjacency-matrix to constant memory on the device
     cudaErr = cudaMemcpyToSymbol(adjMat_d, adjMat, adj_size);
+    
     if(cudaErr != cudaSuccess)
     {
         printf("Error copying from host to device symbol\n");
@@ -142,69 +136,37 @@ int main()
     else
         printf("Successful copy from host to device symbol\n");
     
-    
-    
-    // Delete from here
-
-    cudaMalloc((void **)&test_cpy_d, adj_size);
-    cudaMemcpy(test_cpy_d, test_cpy, adj_size, cudaMemcpyHostToDevice);
-
+    // Set the dimensions of the grid and blocks
     dim3 dimGrid(GRID_X, 1);
     dim3 dimBlock(BLOCK_X, 1);
 
-    printAdjMat<<<dimGrid, dimBlock>>>(test_cpy_d, 7);
-
-    cudaMemcpy(test_cpy, test_cpy_d, adj_size, cudaMemcpyDeviceToHost);
-
-    for(int i = 0; i < 7; i++)
-    {
-        for(int j = 0; j < 7; j++)
-            printf("{%d} ", test_cpy[i * 7 + j]);
-
-        printf("\n");
-    }
-
-    cudaFree(test_cpy_d);
-
-    delete [] test_cpy;
-    
-    // Delete to here
 
 
-    /*  COMMENTED OUT FOR TESTING  QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
 
-    // Allocate memory on the device and copy contents
-    cudaMalloc((void **)&adj_d, adj_size);
-    cudaMemcpy(adj_d, adjMat, adj_size, cudaMemcpyHostToDevice);
-
+    // Allocate memory on the device 
     cudaMalloc((void **)&dist_d, dist_size);
     cudaMemcpy(dist_d, dist, dist_size, cudaMemcpyHostToDevice);
 
     cudaMalloc((void **)&parent_d, parent_size);
     cudaMemcpy(parent_d, parent, parent_size, cudaMemcpyHostToDevice);
 
-    // Set grid and block dimensions
-    dim3 dimGrid(GRID_X, 1);
-    dim3 dimBlock(BLOCK_X, 1);
-
     // Invoke the kernel
-    dijkstra<<<dimGrid, dimBlock>>>(adj_d, dist_d, parent_d, start, width);
+    dijkstra_helper<<<dimGrid, dimBlock>>>(dist_d, parent_d, start, width);
 
     // Copy the results back
     cudaMemcpy(dist, dist_d, dist_size, cudaMemcpyDeviceToHost);
     cudaMemcpy(parent, parent_d, parent_size, cudaMemcpyDeviceToHost);
+
+    // Free the device memory
+    cudaFree(dist_d);
+    cudaFree(parent_d);
+
 
     // Print the distances from start vertex s
     for(int i = 0; i < width; i++)
         printf("%d to %d: %d\n", i, start, dist[i]);
     printf("\n\n");
 
-    // Free the device memory
-    cudaFree(adj_d);
-    cudaFree(dist_d);
-    cudaFree(parent_d);
-
-    QQQQQQQQQQQQQQQQQQQQQQQQ   COMMENTED OUT FOR TESTING */
 
     // Free the host memory
     delete [] adjMat;
