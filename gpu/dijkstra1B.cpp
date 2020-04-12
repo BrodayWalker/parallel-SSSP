@@ -13,12 +13,14 @@
 
 using namespace std;
 
-const int GRID_X = 1;
-const int BLOCK_X = 1;
-const int BILLION = 1000000000;
+const int GRID_X = 1; // Number of blocks in the grid on the x-axis 
+const int BLOCK_X = 7; // Number of threads on the x-axis per block
+const int BILLION = 1000000000; // Used as a substitute for the value of infinity
+const int SIZE = 49; // Just for testing
 
+__constant__ int adjMat_d[SIZE];
 
-__host__ __device__ void dijkstra(int *adj_d, int *dist_d, int *parent_d, int s, int width)
+__global__ void dijkstra(int *adj_d, int *dist_d, int *parent_d, int s, int width)
 {   
     printf("Adjacency matrix from the device\n");
     // Print the adjacency matrix for testing
@@ -32,25 +34,40 @@ __host__ __device__ void dijkstra(int *adj_d, int *dist_d, int *parent_d, int s,
         printf("\n");
     }
     printf("\n\n");
-
-
-    // Priority queue
-    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>> pq;
-
-    
-    pq.push(pair<int, int>(0, s));
-
-
 }
 
+__global__ void printAdjMat(int *test, int width)
+{
+    if(threadIdx.x == 0)
+        printf("Invoked\n");
+
+    int tid = threadIdx.x;
+    
+    
+    for(int i = 0; i < 7; i++)
+        test[i * width + tid] = adjMat_d[i * width + tid] + 1;
+}
 
 int main()
 {
     int num_edges, adj_size, dist_size, parent_size, start, end, width;
     // Host arrays
     int *adjMat, *dist, *parent;
+
+
+    // Delete from here
+    int *test_cpy, *test_cpy_d; //
+    test_cpy = new int[49];     //
+                                //
+    for(int i = 0; i < 49; i++) //
+        test_cpy[i] = 0;        //
+    // Delete to here
+
     // Device arrays
     int *adj_d, *dist_d, *parent_d;
+
+    // For error checking
+    cudaError_t cudaErr;
 
     // Read in the number of vertices
     cin >> width;
@@ -59,6 +76,11 @@ int main()
     adjMat = new int[width * width];
     dist = new int[width];
     parent = new int[width];
+
+    // Find size of arrays in bytes
+    adj_size = width * width * sizeof(int);
+    dist_size = width * sizeof(int); // Equal to the number of vertices
+    parent_size = width * sizeof(int);
 
     // Fill arrays with 0s
     for(int i = 0; i < width * width; i++)
@@ -76,10 +98,6 @@ int main()
     parent[start] = -1; // -1 is used to signal no parent
     end = 7;
 
-    // Find size of arrays in bytes
-    adj_size = width * width * sizeof(int);
-    dist_size = width * sizeof(int); // Equal to the number of vertices
-    parent_size = width * sizeof(int);
 
     // Fill the adjacency matrix with data
     for(int i = 0; i < width; i++)
@@ -114,6 +132,47 @@ int main()
     }
     cout << "\n\n";
         
+    // Copy the adjacency-matrix to constant memory on the device
+    cudaErr = cudaMemcpyToSymbol(adjMat_d, adjMat, adj_size);
+    if(cudaErr != cudaSuccess)
+    {
+        printf("Error copying from host to device symbol\n");
+        return 1;
+    }
+    else
+        printf("Successful copy from host to device symbol\n");
+    
+    
+    
+    // Delete from here
+
+    cudaMalloc((void **)&test_cpy_d, adj_size);
+    cudaMemcpy(test_cpy_d, test_cpy, adj_size, cudaMemcpyHostToDevice);
+
+    dim3 dimGrid(GRID_X, 1);
+    dim3 dimBlock(BLOCK_X, 1);
+
+    printAdjMat<<<dimGrid, dimBlock>>>(test_cpy_d, 7);
+
+    cudaMemcpy(test_cpy, test_cpy_d, adj_size, cudaMemcpyDeviceToHost);
+
+    for(int i = 0; i < 7; i++)
+    {
+        for(int j = 0; j < 7; j++)
+            printf("{%d} ", test_cpy[i * 7 + j]);
+
+        printf("\n");
+    }
+
+    cudaFree(test_cpy_d);
+
+    delete [] test_cpy;
+    
+    // Delete to here
+
+
+    /*  COMMENTED OUT FOR TESTING  QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
+
     // Allocate memory on the device and copy contents
     cudaMalloc((void **)&adj_d, adj_size);
     cudaMemcpy(adj_d, adjMat, adj_size, cudaMemcpyHostToDevice);
@@ -144,6 +203,8 @@ int main()
     cudaFree(adj_d);
     cudaFree(dist_d);
     cudaFree(parent_d);
+
+    QQQQQQQQQQQQQQQQQQQQQQQQ   COMMENTED OUT FOR TESTING */
 
     // Free the host memory
     delete [] adjMat;
