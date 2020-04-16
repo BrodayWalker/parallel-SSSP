@@ -14,3 +14,6 @@ This section will be added shortly. <br>
 This section will be added shortly. <br>
 ## Results
 This section will be added shortly. <br>
+## Resources
+1. [Competitive Programming 3](https://cpbook.net/#CP3details)
+2. [Dijkstra's Algorithm Visualization](https://www.cs.usfca.edu/~galles/visualization/Dijkstra.html)
