@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <vector>
 #include <queue>
 
@@ -22,7 +23,7 @@ int main()
     infile.open("input.txt");
 
     // Declarations
-    int num_inters, num_edges, edge, delay, start, end, p, cases = 1;
+    int num_inters, num_edges, v, delay, start, end, p, cases = 1;
 
     // Read in number of intersections
     cin >> num_inters;
@@ -50,15 +51,24 @@ int main()
         // Build the adjacency matrix
         for (int i = 1; i <= num_inters; i++)
         {
-            // Read in the number of edges from this node to other nodes
+            // Read in the number of edges from this vertex to other vertices
             cin >> num_edges;
-            // Build this node's adjacency list
+            // Build this vertex's adjacency list
             for (int j = 0; j < num_edges; j++)
             {
-                cin >> edge >> delay;
-                adjMat[i][edge] = delay;
+                cin >> v >> delay;
+
+                // This check is necessary to ensure only the shortest edge between two
+                // vertices is added to the adjacency-matrix representation of the input 
+                // graph. This design decision results in the removal of any multiples of
+                // a direct edge between two vertices. In other words, only the shortest
+                // direct edge between vertices is recorded. The adjacency-list version
+                // of the UVA341 solution does keep the extra paths.
+                if (adjMat[i][v] == -1 || delay < adjMat[i][v])
+                    adjMat[i][v] = delay;
             }
         }
+
         // Read in the start and end nodes
         cin >> start >> end;
 
