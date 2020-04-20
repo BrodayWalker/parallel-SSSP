@@ -1,10 +1,14 @@
 //***************************************************************************
 //  Broday Walker
 //  Dr. Eduardo Colmenares
+//
+//  This program is for testing a parallel implementation of Dijkstra's 
+//  algorithm for one specific input graph that has 7 vertices.
+//
 //   
 //  Turing
-//  Compilation:  /opt/bin/cuda-9.0/bin/nvcc -arch=sm_35 -rdc=true dijkstra1B.cu -o dijkstra1B.exe
-//  Execution: ./dijkstra.exe < input.txt > output.txt
+//  Compilation:  /opt/bin/cuda-9.0/bin/nvcc -arch=sm_35 -rdc=true d1BconstAdjMat.cu -o d1B.exe
+//  Execution: ./d1B.exe < input.txt > output.txt
 //***************************************************************************
 
 #include <cuda.h>
@@ -107,6 +111,8 @@ __global__ void dijkstra(int *dist_d, int *parent_d, int *visited_d, int s, int 
         }
     }
 }
+
+
 
 // A kernel for testing if the adjacency matrix was actually copied to the constant
 // memory on the device
