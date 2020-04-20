@@ -3,27 +3,34 @@
 //                                UVA 341
 //  Description: Solved using Dijkstra's Algorithm
 //
-//  Compilation: g++ UVA341.cpp -o main.exe -std=c++11
+//  Compilation: g++ UVA341_adjMat.cpp -o main.exe -std=c++11
+//  ./main.exe < input.txt > output.txt
 // *********************************************************************** //
 
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <vector>
 #include <queue>
+#include <stack>
+#include <climits>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
-const int BILLION = 1000000000;
-
 int main()
 {
-    // Open the input file
-    ifstream infile;
-    infile.open("input.txt");
-
     // Declarations
     int num_inters, num_edges, v, delay, start, end, p, cases = 1;
+    double diff;
+	struct timespec begin, stop;
+
+	ofstream outfile;
+	outfile.open("timings_UVA341_adjMat.txt");
+
+	// Start timer
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 
     // Read in number of intersections
     cin >> num_inters;
@@ -31,8 +38,8 @@ int main()
     {
         // Distance vector:
         // 0th element not used due to intersection numbering scheme
-        // BILLION is used as infinity
-        vector<int> dist(num_inters + 1, BILLION); 
+        // INT_MAX is used as infinity
+        vector<int> dist(num_inters + 1, INT_MAX); 
 
         // Parent vector
         vector<int> parent(num_inters + 1, -1);
@@ -137,10 +144,14 @@ int main()
         cin >> num_inters;
     }
 
+    // Get end time
+	clock_gettime(CLOCK_MONOTONIC, &stop);
 
+	// Calculate elapsed time in milliseconds
+	diff = (stop.tv_sec - begin.tv_sec) + (stop.tv_nsec - begin.tv_nsec) / 1000000.0;
 
+	outfile << "Time elapsed is " << diff << " milliseconds.\n";
 
-    // Close the input file
-    infile.close();
+    outfile.close();
     return 0;
 }

@@ -8,12 +8,20 @@
 //  allows the algorithm to correctly process edge weights of 0, which occur
 //  in one of the testing datasets for UVA341.
 //
+//
+//  Compilation: g++ UVA341_CSR.cpp -o main.exe -std=c++11
+//  ./main.exe < input.txt > output.txt
 //***************************************************************************
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <queue>
 #include <stack>
+#include <climits>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
@@ -21,6 +29,14 @@ int main()
 {
     // Declarations
     int num_inters, num_edges, v, delay, start, end, p, cases = 1;
+    double diff;
+	struct timespec begin, stop;
+
+	ofstream outfile;
+	outfile.open("timings_UVA341_CSR.txt");
+
+	// Start timer
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 
     // Read in number of intersections
     cin >> num_inters;
@@ -35,7 +51,7 @@ int main()
         vector<int> parent(num_inters + 1, -1);
 
         // Path queue
-        vector<int> path;
+        stack<int> path;
 
         // A beautiful vector of vectors of integers
         // Must add 1 to the size of the vector because intersections are
@@ -151,27 +167,40 @@ int main()
         }
         
         // Start at this vertex and work back through the parent vertices to the start
-        p = end;
-        path.push_back(p);
-        while (p != start)
-        {
-            path.push_back(parent[p]);
-            p = parent[p];
-        }
-        
-        // Print result
-        cout << "Case " << cases << ": Path =";
-        for(int i = path.size() - 1; i >= 0; i--)
-            cout << " " << path[i];
-        cout << "; " << dist[end] << " second delay\n";
-        
+		p = end;
+		path.push(p);
+		while (p != start)
+		{
+			p = parent[p];
+			path.push(p);
+		}
 
+		// Print result
+		cout << "Case " << cases << ": Path =";
 
+		while (!path.empty())
+		{
+			cout << " " << path.top();
+			path.pop();
+		}
+
+		cout << "; " << dist[end] << " second delay\n";
+        
         // Increment the case being processed
         cases++;
         // Read in number of intersections
         cin >> num_inters;
     }
+
+    // Get end time
+	clock_gettime(CLOCK_MONOTONIC, &stop);
+
+	// Calculate elapsed time in milliseconds
+	diff = (stop.tv_sec - begin.tv_sec) + (stop.tv_nsec - begin.tv_nsec) / 1000000.0;
+
+	outfile << "Time elapsed is " << diff << " milliseconds.\n";
+
+    outfile.close();
 
     return 0;
 }

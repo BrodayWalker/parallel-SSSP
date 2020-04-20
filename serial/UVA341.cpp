@@ -4,26 +4,33 @@
 //  Description: Solved using Dijkstra's Algorithm
 //
 //  Compilation: g++ UVA341.cpp -o main.exe -std=c++11
+//  ./main.exe < input.txt > output.txt
 // *********************************************************************** //
 
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <queue>
-
+#include <stack>
+#include <climits>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
-const int BILLION = 1000000000;
-
 int main()
 {
-    // Open the input file
-    ifstream infile;
-    infile.open("input.txt");
-
     // Declarations
     int num_inters, num_edges, edge, delay, start, end, p, cases = 1;
+    double diff;
+	struct timespec begin, stop;
+
+	ofstream outfile;
+	outfile.open("timings_UVA341.txt");
+
+	// Start timer
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 
     // Read in number of intersections
     cin >> num_inters;
@@ -31,14 +38,14 @@ int main()
     {
         // Distance vector:
         // 0th element not used due to intersection numbering scheme
-        // BILLION is used as infinity
-        vector<int> dist(num_inters + 1, BILLION); 
+        // INT_MAX is used as infinity
+        vector<int> dist(num_inters + 1, INT_MAX); 
 
         // Parent vector
         vector<int> parent(num_inters + 1, -1);
 
         // Path queue
-        vector<int> path;
+        stack<int> path;
 
         // A beautiful vector of vectors of pairs of integers
         vector<vector<pair<int,int>>> adjList;
@@ -105,20 +112,25 @@ int main()
             }
         }
         
-        // Start at this node and work back through the parent nodes to the start
-        p = end;
-        path.push_back(p);
-        while (p != start)
-        {
-            path.push_back(parent[p]);
-            p = parent[p];
-        }
-        
-        // Print result
-        cout << "Case " << cases << ": Path =";
-        for(int i = path.size() - 1; i >= 0; i--)
-            cout << " " << path[i];
-        cout << "; " << dist[end] << " second delay\n";
+        // Start at this vertex and work back through the parent vertices to the start
+		p = end;
+		path.push(p);
+		while (p != start)
+		{
+			p = parent[p];
+			path.push(p);
+		}
+
+		// Print result
+		cout << "Case " << cases << ": Path =";
+
+		while (!path.empty())
+		{
+			cout << " " << path.top();
+			path.pop();
+		}
+
+		cout << "; " << dist[end] << " second delay\n";
         
         // Increment the case being processed
         cases++;
@@ -126,10 +138,14 @@ int main()
         cin >> num_inters;
     }
 
+    // Get end time
+	clock_gettime(CLOCK_MONOTONIC, &stop);
 
+	// Calculate elapsed time in milliseconds
+	diff = (stop.tv_sec - begin.tv_sec) + (stop.tv_nsec - begin.tv_nsec) / 1000000.0;
 
+	outfile << "Time elapsed is " << diff << " milliseconds.\n";
 
-    // Close the input file
-    infile.close();
+    outfile.close();
     return 0;
 }
