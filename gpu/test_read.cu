@@ -184,7 +184,6 @@ int main()
 
 
         cin >> vertices;
-
     }
 
     return 0;
