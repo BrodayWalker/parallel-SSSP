@@ -51,7 +51,7 @@ int main()
     while(vertices != 0)
     {
         // Host Declarations
-        int num_edges, adj_size, dist_size, parent_size, visited_size, start, end;
+        int adj_size, dist_size, parent_size, visited_size, start, end;
         int *adjMat, *dist, *parent, *visited;
 
         // Device declarations
@@ -74,7 +74,7 @@ int main()
 
         // Fill the adjacency-matrix with 0s
         for(int i = 0; i < vertices * vertices; i++)
-            adjMat[i] = 0;
+            adjMat[i] = -1;
 
         // A vertex does not have a parent if its value is -1 (after running 
         // Dijkstra's algorithm, this will only be true for the starting vertex).
@@ -89,22 +89,22 @@ int main()
         for(int i = 0; i < vertices; i++)
         {
             // Temporary storage for adjacent vertices and the weight of the edge
-            vector<pair<int, int>> temp_edges;
+            int num_edges, u, w;
 
             // Read in the number of adjacent vertices for the ith vertex
             cin >> num_edges;
 
-            temp_edges.resize(num_edges);
-
-            for(int j = 0; j < temp_edges.size(); j++)
-                cin >> temp_edges[j].first >> temp_edges[j].second;
-
             // Add the adjacent vertices to the linearized adjacency-matrix for the ith vertex
-            for(int j = 0; j < temp_edges.size(); j++)
-                // This is basically blockIdx.x * blockDim.x + threadIdx.x where blockIdx.x 
-                // corresponds with the iteration of the loop we are on
-                adjMat[i * vertices + temp_edges[j].first] = temp_edges[j].second;
+            for(int j = 0; j < num_edges; j++)
+            {
+                cin >> u >> w;
+                int offset = i * vertices + u;
 
+                if(adjMat[offset] == -1 || w < adjMat[offset])
+                    // This is basically blockIdx.x * blockDim.x + threadIdx.x where blockIdx.x 
+                    // corresponds with the iteration of the loop we are on
+                    adjMat[offset] = w;
+            }
         }
 
         cin >> start >> end;
