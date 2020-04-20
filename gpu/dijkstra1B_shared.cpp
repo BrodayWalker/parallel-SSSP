@@ -3,14 +3,20 @@
 //  Dr. Eduardo Colmenares
 //   
 //  Turing
-//  Compilation:  /opt/bin/cuda-9.0/bin/nvcc -arch=sm_35 -rdc=true dijkstra1B_shared.cu -o dijkstra1B_shared.exe
+//  Compilation:  /opt/bin/cuda-9.0/bin/nvcc -arch=sm_37 -rdc=true dijkstra1B_shared.cu -o dijkstra1B_shared.exe
 //  Execution: ./dijkstra_shared.exe < input.txt > output.txt
 //***************************************************************************
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <stack>
+#include <climits>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 #include <cuda.h>
 #include <stdio.h>
-#include <iostream>
-#include <stack>
 
 using namespace std;
 
@@ -121,6 +127,14 @@ __global__ void transferAdjMat(int *test, int *adjMat_d, int width)
 int main()
 {
     int vertices, cases = 1;
+    double diff;
+	struct timespec begin, stop;
+
+	ofstream outfile;
+	outfile.open("timings_GPU_1B_shared.txt");
+
+	// Start timer
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 
     cin >> vertices;
 
@@ -284,6 +298,16 @@ int main()
         cin >> vertices;
 
     }
+
+    // Get end time
+	clock_gettime(CLOCK_MONOTONIC, &stop);
+
+	// Calculate elapsed time in milliseconds
+	diff = (stop.tv_sec - begin.tv_sec) + (stop.tv_nsec - begin.tv_nsec) / 1000000.0;
+
+	outfile << "Time elapsed is " << diff << " milliseconds.\n";
+
+    outfile.close();
 
     return 0;
 }
