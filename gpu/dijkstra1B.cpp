@@ -2,14 +2,15 @@
 //  Broday Walker
 //  Dr. Eduardo Colmenares
 //   
-//
+//  Turing
+//  Compilation:  /opt/bin/cuda-9.0/bin/nvcc -arch=sm_35 -rdc=true dijkstra1B.cu -o dijkstra1B.exe
+//  Execution: ./dijkstra.exe < input.txt > output.txt
 //***************************************************************************
 
 #include <cuda.h>
 #include <stdio.h>
 #include <iostream>
-#include <vector>
-#include <queue>
+#include <stack>
 
 using namespace std;
 
@@ -21,16 +22,93 @@ const int SIZE = 49;
 // modified over the lifetime of the program
 __constant__ int adjMat_d[SIZE];
 
+
+__global__ void relax(int *dist_d, int *parent_d, int *visited_d, int u, int width)
+{
+    int tid_x = threadIdx.x;
+
+    int offset = u * width + tid_x;
+
+    // Each thread will attempt to relax an adjacent vertex if an edge exists
+    // If the vertex is unvisited and the edge exists
+    if(tid_x != u && visited_d[tid_x] == 0 && adjMat_d[offset] >= 0)
+    {
+        int v_dist = adjMat_d[offset];
+
+        if(dist_d[u] + v_dist < dist_d[tid_x])
+        {
+            // Relax  
+            dist_d[tid_x] = dist_d[u] + v_dist;
+            // Set parent
+            parent_d[tid_x] = u;
+        }
+    }
+    
+}
+
 __global__ void dijkstra(int *dist_d, int *parent_d, int *visited_d, int s, int width)
 {   
+    dim3 childGrid(GRID_X, 1);
+    dim3 childBlock(BLOCK_X, 1);
+
     int tid_x = threadIdx.x;
-    int block_x = blockIdx.x;
-    int grid_x = gridDim.x;
 
+    bool all_visited = false;
 
+    if(tid_x == 0)
+    {
+        while(!all_visited)
+        {
+            all_visited = true;
+            bool next_found = false;
 
+            // These are u sed as the variables for the next vertex's index and minimum cost
+            int u, u_min, index = 0;
 
+            // Find the next unvisited vertex (if there is one)
+            while (!next_found && index < width)
+            {
+                if(visited_d[index] == 0)
+                {
+                    u = index;
+                    u_min = dist_d[index];
+                    all_visited = false;
+                    next_found = true;
+                }
+
+                index++;
+            }
+
+            if(!all_visited)
+            {
+                // Find shortest distance of all the unvisited vertices
+                // Start at the first unvisited vertex encountered in the previous loop to 
+                // try to save some computation.
+                int i = u + 1;
+                while(i < width)
+                {
+                    if(visited_d[i] == 0 && dist_d[i] < u_min)
+                    {
+                        u = i;
+                        u_min = dist_d[i];
+                    }
+
+                    i++;
+                }
+
+                // Now we have the next vertex to process in u
+                // Set u as visited
+                visited_d[u] = 1;
+
+                // Attempt to relax all vertices adjacent to vertex u
+                relax<<<childGrid, childBlock>>>(dist_d, parent_d, visited_d, u, width);
+                cudaDeviceSynchronize();
+            }
+        }
+    }
 }
+
+
 
 // A kernel for testing if the adjacency matrix was actually copied to the constant
 // memory on the device
@@ -44,15 +122,16 @@ __global__ void printAdjMat(int *test, int width)
 
 int main()
 {
-    int vertices;
+    int vertices, cases = 1;
 
     cin >> vertices;
 
     while(vertices != 0)
     {
         // Host Declarations
-        int adj_size, dist_size, parent_size, visited_size, start, end;
+        int adj_size, dist_size, parent_size, visited_size, start, end, p;
         int *adjMat, *dist, *parent, *visited;
+        stack<int> path;
 
         // Device declarations
         int *adj_d, *dist_d, *parent_d, *visited_d;
@@ -108,6 +187,8 @@ int main()
         }
 
         cin >> start >> end;
+
+        // Set distance of source vertex to 0;
         dist[start] = 0;
 
         // Print weights for testing
@@ -132,14 +213,10 @@ int main()
             printf("Error copying from host to device symbol\n");
             return 1;
         }
-        else
-            printf("Successful copy from host to device symbol\n");
         
         // Set the dimensions of the grid and blocks
-        dim3 gridDim(GRID_X, 1);
-        dim3 blockDim(BLOCK_X, 1);
-
-
+        dim3 gridDim(1, 1);
+        dim3 blockDim(1, 1);
 
 
         // Allocate memory on the device 
@@ -175,6 +252,29 @@ int main()
             printf("%d: %d\n", i, parent[i]);
         printf("\n\n");
 
+        // Start at the end vertex and work back through the parent vertices to build
+        // the path
+        p = end;
+		path.push(p);
+		while (p != start)
+		{
+			p = parent[p];
+			path.push(p);
+		}
+
+		// Print result
+		cout << "Case " << cases << ": Path =";
+
+		while (!path.empty())
+		{
+            // NOTE
+            // Add one to the vertex ID number if comparing results to UVA problem 341 
+			cout << " " << path.top() + 1;
+			path.pop();
+		}
+
+		cout << "; " << dist[end] << " second delay\n";
+
 
         // Free the host memory
         delete [] adjMat;
@@ -183,6 +283,7 @@ int main()
         delete [] visited;
 
 
+        cases++;
         cin >> vertices;
 
     }
