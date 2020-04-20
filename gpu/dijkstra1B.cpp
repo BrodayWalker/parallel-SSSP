@@ -14,16 +14,7 @@
 
 using namespace std;
 
-const int GRID_X = 1; // Number of blocks in the grid on the x-axis 
-const int BLOCK_X = 7; // Number of threads on the x-axis per block
-const int SIZE = 49;
-
-// Hold the adjacency matrix in constant memory on the device as it will not be
-// modified over the lifetime of the program
-__constant__ int adjMat_d[SIZE];
-
-
-__global__ void relax(int *dist_d, int *parent_d, int *visited_d, int u, int width)
+__global__ void relax(int *dist_d, int *parent_d, int *visited_d, int *adjMat_d, int u, int width)
 {
     int tid_x = threadIdx.x;
 
@@ -46,10 +37,10 @@ __global__ void relax(int *dist_d, int *parent_d, int *visited_d, int u, int wid
     
 }
 
-__global__ void dijkstra(int *dist_d, int *parent_d, int *visited_d, int s, int width)
+__global__ void dijkstra(int *dist_d, int *parent_d, int *visited_d, int *adjMat_d, int s, int width)
 {   
-    dim3 childGrid(GRID_X, 1);
-    dim3 childBlock(BLOCK_X, 1);
+    dim3 childGrid(1, 1);
+    dim3 childBlock(width, 1);
 
     int tid_x = threadIdx.x;
 
@@ -101,7 +92,7 @@ __global__ void dijkstra(int *dist_d, int *parent_d, int *visited_d, int s, int 
                 visited_d[u] = 1;
 
                 // Attempt to relax all vertices adjacent to vertex u
-                relax<<<childGrid, childBlock>>>(dist_d, parent_d, visited_d, u, width);
+                relax<<<childGrid, childBlock>>>(dist_d, parent_d, visited_d, adjMat_d, u, width);
                 cudaDeviceSynchronize();
             }
         }
@@ -110,7 +101,7 @@ __global__ void dijkstra(int *dist_d, int *parent_d, int *visited_d, int s, int 
 
 // A kernel for testing if the adjacency matrix was actually copied to the constant
 // memory on the device
-__global__ void printAdjMat(int *test, int width)
+__global__ void printAdjMat(int *test, int *adjMat_d, int width)
 {
     int tid_x = threadIdx.x;
     
@@ -132,10 +123,7 @@ int main()
         stack<int> path;
 
         // Device declarations
-        int *adj_d, *dist_d, *parent_d, *visited_d;
-
-        // For error checking
-        cudaError_t cudaErr;
+        int *adjMat_d, *dist_d, *parent_d, *visited_d;
 
         // This is a linearized adjacency matrix
         adjMat = new int[vertices * vertices];
@@ -189,6 +177,9 @@ int main()
         // Set distance of source vertex to 0;
         dist[start] = 0;
 
+
+        /*
+
         // Print weights for testing
         printf("Test print of all weights: \n");
         printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
@@ -202,20 +193,12 @@ int main()
         }
         printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
         cout << "\n\n";
-            
-        // Copy the adjacency-matrix to constant memory on the device
-        cudaErr = cudaMemcpyToSymbol(adjMat_d, adjMat, adj_size);
-        
-        if(cudaErr != cudaSuccess)
-        {
-            printf("Error copying from host to device symbol\n");
-            return 1;
-        }
-        
+
+        */
+              
         // Set the dimensions of the grid and blocks
         dim3 gridDim(1, 1);
         dim3 blockDim(1, 1);
-
 
         // Allocate memory on the device 
         cudaMalloc((void **)&dist_d, dist_size);
@@ -224,11 +207,14 @@ int main()
         cudaMalloc((void **)&parent_d, parent_size);
         cudaMemcpy(parent_d, parent, parent_size, cudaMemcpyHostToDevice);
 
-        cudaMalloc((void**)&visited_d, visited_size);
+        cudaMalloc((void **)&visited_d, visited_size);
         cudaMemcpy(visited_d, visited, visited_size, cudaMemcpyHostToDevice);
 
+        cudaMalloc((void **)&adjMat_d, adj_size);
+        cudaMemcpy(adjMat_d, adjMat, adj_size, cudaMemcpyHostToDevice);
+
         // Invoke the kernel
-        dijkstra<<<gridDim, blockDim>>>(dist_d, parent_d, visited_d, start, vertices);
+        dijkstra<<<gridDim, blockDim>>>(dist_d, parent_d, visited_d, adjMat_d, start, vertices);
 
         // Copy the results back
         cudaMemcpy(dist, dist_d, dist_size, cudaMemcpyDeviceToHost);
@@ -240,6 +226,8 @@ int main()
         cudaFree(visited_d);
 
 
+        /*
+
         // Print the distances from start vertex s
         for(int i = 0; i < vertices; i++)
             printf("%d to %d: %d\n", i, start, dist[i]);
@@ -249,6 +237,8 @@ int main()
         for(int i = 0; i < vertices; i++)
             printf("%d: %d\n", i, parent[i]);
         printf("\n\n");
+
+        */
 
         // Start at the end vertex and work back through the parent vertices to build
         // the path
