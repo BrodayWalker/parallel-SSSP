@@ -1,13 +1,20 @@
 //***************************************************************************
-// Broday Walker
+//	Broday Walker
 //
-// This is UVA341 solved without the use of a priority queue in the 
-// implementation of Dijkstra's algorithm.
+// 	This is UVA341 solved without the use of a priority queue in the 
+// 	implementation of Dijkstra's algorithm.
 //
+//	g++ UVA341_noQ.cpp -o noQ.exe -std=c++11
+//	./main.exe < input.txt > output.txt
 //***************************************************************************
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <stack>
+#include <climits>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
@@ -15,6 +22,14 @@ int main()
 {
 	// Declarations
 	int num_inters, num_edges, v, delay, start, end, p, cases = 1;
+	double diff;
+	struct timespec begin, stop;
+
+	ofstream outfile;
+	outfile.open("timings_UVA341_noQ.txt");
+
+	// Start timer
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 
 	// Read in number of intersections
 	cin >> num_inters;
@@ -163,5 +178,14 @@ int main()
 		cin >> num_inters;
 	}
 
+	// Get end time
+	clock_gettime(CLOCK_MONOTONIC, &stop);
+
+	// Calculate elapsed time in milliseconds
+	diff = (stop.tv_sec - begin.tv_sec) + (stop.tv_nsec - begin.tv_nsec) / 1000000.0;
+
+	outfile << "Time elapsed is " << diff << " milliseconds.\n";
+
+	outfile.close();
 	return 0;
 }
