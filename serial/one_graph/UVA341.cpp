@@ -17,14 +17,17 @@
 #include <stdlib.h>
 #include <time.h>
 
+const float ONE_MILLION = 1000000;
+
 using namespace std;
+
+timespec elapsed(timespec, timespec);
 
 int main()
 {
     // Declarations
     int num_inters, num_edges, edge, delay, start, end, p, cases = 1;
-    double diff;
-	struct timespec begin, stop;
+	struct timespec begin, stop, diff;
 
 	ofstream outfile;
 	outfile.open("timings_UVA341.txt");
@@ -141,11 +144,31 @@ int main()
     // Get end time
 	clock_gettime(CLOCK_MONOTONIC, &stop);
 
-	// Calculate elapsed time in milliseconds
-	diff = (stop.tv_sec - begin.tv_sec) + (stop.tv_nsec - begin.tv_nsec) / 1000000.0;
+	// Calculate elapsed time in nanoseconds
+	diff = elapsed(begin, stop);
 
-	outfile << "Time elapsed is " << diff << " milliseconds.\n";
+	outfile << "Time elapsed is " << diff.tv_sec << " seconds and " << diff.tv_nsec / ONE_MILLION << " milliseconds.\n";
 
     outfile.close();
     return 0;
+}
+
+// Special thanks to Guy Rutenberg for this hint on negative timing values were being reported
+// https://www.guyrutenberg.com/2007/09/22/profiling-code-using-clock_gettime/comment-page-1/
+timespec elapsed(timespec start, timespec end)
+{
+	timespec temp;
+
+	if ((end.tv_nsec - start.tv_nsec) < 0) 
+    {
+		temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+		temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+	} 
+    else 
+    {
+		temp.tv_sec = end.tv_sec - start.tv_sec;
+		temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+	}
+
+	return temp;
 }
