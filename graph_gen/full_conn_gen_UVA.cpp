@@ -12,7 +12,7 @@
 
 using namespace std;
 
-const int VERTICES = 2048;
+const int VERTICES = 4096;
 const int WEIGHT_LIMIT = 101;
 
 int main()
