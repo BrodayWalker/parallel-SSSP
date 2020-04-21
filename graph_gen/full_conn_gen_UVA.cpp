@@ -4,13 +4,15 @@
 //  This program generates a fully connected graph using the same format as
 //  UVA problem 341.
 //
+//  Compilation: g++ full_conn_gen_UVA.cpp -o full_conn_gen_UVA.exe -std=c++11
+//  Execution: ./full_conn_gen_UVA.exe > some_file.txt
 //***************************************************************************
 #include <iostream>
 #include <time.h>
 
 using namespace std;
 
-const int VERTICES = 1024;
+const int VERTICES = 2048;
 const int WEIGHT_LIMIT = 101;
 
 int main()
