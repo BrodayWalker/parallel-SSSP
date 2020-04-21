@@ -1,1 +1,0 @@
-Case 1: Path = 354 702 17 768; 3 second delay
