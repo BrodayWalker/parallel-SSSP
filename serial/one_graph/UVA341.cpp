@@ -17,9 +17,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-const float ONE_MILLION = 1000000;
-
 using namespace std;
+
+const float ONE_MILLION = 1000000;
 
 timespec elapsed(timespec, timespec);
 
@@ -31,9 +31,6 @@ int main()
 
 	ofstream outfile;
 	outfile.open("timings_UVA341.txt");
-
-	// Start timer
-	clock_gettime(CLOCK_MONOTONIC, &begin);
 
     // Read in number of intersections
     cin >> num_inters;
@@ -76,6 +73,9 @@ int main()
 
         /* Dijkstra's */
 
+        // Start timer
+	    clock_gettime(CLOCK_MONOTONIC, &begin);
+
         // Set start node's distance from start to 0
         dist[start] = 0;
         // Because pq is a priority queue, the first int is the distance from the start node
@@ -114,6 +114,9 @@ int main()
                 }
             }
         }
+
+        // Get end time
+	    clock_gettime(CLOCK_MONOTONIC, &stop);
         
         // Start at this vertex and work back through the parent vertices to the start
 		p = end;
@@ -140,9 +143,6 @@ int main()
         // Read in number of intersections
         cin >> num_inters;
     }
-
-    // Get end time
-	clock_gettime(CLOCK_MONOTONIC, &stop);
 
 	// Calculate elapsed time in nanoseconds
 	diff = elapsed(begin, stop);
