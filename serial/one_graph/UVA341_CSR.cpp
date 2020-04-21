@@ -25,18 +25,18 @@
 
 using namespace std;
 
+const float ONE_MILLION = 1000000;
+
+timespec elapsed(timespec, timespec);
+
 int main()
 {
     // Declarations
     int num_inters, num_edges, v, delay, start, end, p, cases = 1;
-    double diff;
-	struct timespec begin, stop;
+	struct timespec begin, stop, diff;
 
 	ofstream outfile;
 	outfile.open("timings_UVA341_CSR.txt");
-
-	// Start timer
-	clock_gettime(CLOCK_MONOTONIC, &begin);
 
     // Read in number of intersections
     cin >> num_inters;
@@ -123,6 +123,9 @@ int main()
 
         // Dijkstra's
 
+        // Start timer
+	    clock_gettime(CLOCK_MONOTONIC, &begin);
+
         // Set start vertex's distance from start to 0
         dist[start] = 0;
 
@@ -165,6 +168,9 @@ int main()
                 }
             }
         }
+
+        // Get end time
+	    clock_gettime(CLOCK_MONOTONIC, &stop);
         
         // Start at this vertex and work back through the parent vertices to the start
 		p = end;
@@ -192,15 +198,31 @@ int main()
         cin >> num_inters;
     }
 
-    // Get end time
-	clock_gettime(CLOCK_MONOTONIC, &stop);
+    // Calculate elapsed time in nanoseconds
+	diff = elapsed(begin, stop);
 
-	// Calculate elapsed time in milliseconds
-	diff = (stop.tv_sec - begin.tv_sec) + (stop.tv_nsec - begin.tv_nsec) / 1000000.0;
-
-	outfile << "Time elapsed is " << diff << " milliseconds.\n";
+	outfile << "Time elapsed is " << diff.tv_sec << " seconds and " << diff.tv_nsec / ONE_MILLION << " milliseconds.\n";
 
     outfile.close();
-
     return 0;
+}
+
+// Special thanks to Guy Rutenberg for this hint on negative timing values were being reported
+// https://www.guyrutenberg.com/2007/09/22/profiling-code-using-clock_gettime/comment-page-1/
+timespec elapsed(timespec start, timespec end)
+{
+	timespec temp;
+
+	if ((end.tv_nsec - start.tv_nsec) < 0) 
+    {
+		temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+		temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+	} 
+    else 
+    {
+		temp.tv_sec = end.tv_sec - start.tv_sec;
+		temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+	}
+
+	return temp;
 }
