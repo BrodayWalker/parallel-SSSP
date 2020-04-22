@@ -64,16 +64,16 @@
 /* 1024 threads per block */
 
 /* 1024 Vertices */
-1.  
-2.   
+1.  127.919 - Shared Memory, 1 Block
+2.  128.333 - Global Memory, 1 Block
 
 /* 2048 Vertices */
-1.  
-2.  
+1.  438.200 - Shared Memory, 2 Blocks
+2.  442.282 - Global Memory, 2 Blocks
 
 /* 4096 Vertices */
-1.  
-2.  
+1.  2207.800 - Shared Memory, 3 Blocks
+2.  2233.780 - Global Memory, 3 Blocks
 
 //***************************************************************************
 //                          Maverick2 GPU - V100
@@ -83,8 +83,8 @@
 /* 1024 threads per block */
 
 /* 1024 Vertices */
-1.  
-2.   
+1.  96.192 - Global Memory, 1 Block
+2.  100.478 - Shared Memory, 1 Block
 
 /* 2048 Vertices */
 1.  
