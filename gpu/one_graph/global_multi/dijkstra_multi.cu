@@ -5,11 +5,15 @@
 //  Turing
 //  Note: -rdc=true must be used as CUDA dynamic parallelism requires separate 
 //  compilation and linking
+//
 //  Compilation:  /opt/cuda-9.0/bin/nvcc -arch=sm_37 -rdc=true dijkstra_multi.cu -o dijkstra_multi.exe
 //  Execution: ./dijkstra_multi.exe < ~/5433/dijkstra/graphs/t_4096.txt > output4096.txt
 //
 //  Maverick2 GTX queue (use submission script)
 //  Compilation: nvcc dijkstra_multi.cu -o dijkstra_multi.exe -std=c++11 -O3 -arch=compute_61 -code=sm_61 -rdc=true
+//
+//  Maverick2 V100
+//  Compilation: nvcc dijkstra_multi.cu -o dijkstra_multi.exe -std=c++11 -O3 -arch=compute_70 -code=sm_70 -rdc=true
 //***************************************************************************
 
 #include <iostream>

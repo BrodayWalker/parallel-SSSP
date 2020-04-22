@@ -10,6 +10,9 @@
 //
 //  Maverick2 GTX queue (use submission script)
 //  Compilation: nvcc dijkstra_s_multi.cu -o dijkstra_s_multi.exe -std=c++11 -O3 -arch=compute_61 -code=sm_61 -rdc=true
+//
+//  Maverick2 V100 queue
+//  Compilation: nvcc dijkstra_s_multi.cu -o dijkstra_s_multi.exe -std=c++11 -O3 -arch=compute_70 -code=sm_70 -rdc=true
 //***************************************************************************
 
 #include <iostream>
