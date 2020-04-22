@@ -3,8 +3,11 @@
 //                                UVA 341
 //  Description: Solved using Dijkstra's Algorithm
 //
-//  Compilation: g++ UVA341.cpp -o main.exe -std=c++11
-//  ./main.exe < input.txt > output.txt
+//  Turing Instructions
+//  Compilation: g++ UVA341.cpp -o UVA341.exe -std=c++11
+//  ./UVA341.exe < ~/5433/dijkstra/graphs/1024.txt > output1024.txt
+//  ./UVA341.exe < ~/5433/dijkstra/graphs/2048.txt > output2048.txt
+//  ./UVA341.exe < ~/5433/dijkstra/graphs/4096.txt > output4096.txt
 // *********************************************************************** //
 
 #include <iostream>

@@ -4,8 +4,11 @@
 // 	This is UVA341 solved without the use of a priority queue in the 
 // 	implementation of Dijkstra's algorithm.
 //
-//	g++ UVA341_noQ.cpp -o noQ.exe -std=c++11
-//	./main.exe < input.txt > output.txt
+//	Turing Instructions
+//	Compilation: g++ UVA341_noQ.cpp -o noQ.exe -std=c++11
+//	./noQ.exe < ~/5433/dijkstra/graphs/1024.txt > output1024.txt
+//  ./noQ.exe < ~/5433/dijkstra/graphs/2048.txt > output2048.txt
+//	./noQ.exe < ~/5433/dijkstra/graphs/4096.txt > output4096.txt
 //***************************************************************************
 #include <iostream>
 #include <fstream>
