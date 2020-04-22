@@ -1,0 +1,95 @@
+/* All times in milliseconds */
+
+//***************************************************************************
+//                          Turing - Serial
+//***************************************************************************
+
+/* One Graph */
+
+/* 1024 Vertices */
+1.  15.7992 - Compressed Sparse Row
+2.  20.5425 - Adjacency List
+3.  26.4168 - Adjacency Matrix, No Queue
+4.  33.1051 - Adjacency Matrix
+
+/* 2048 Vertices */
+1.  54.7785 - Compressed Sparse Row
+2.  78.3576 - Adjacency List
+3.  102.393 - Adjacency Matrix, No Queue
+4.  124.872 - Adjacency Matrix
+
+/* 4096 Vertices */
+1.  199.090 - Compressed Sparse Row
+2.  286.267 - Adjacency List
+3.  427.932 - Adjacency Matrix, No Queue
+4.  488.318 - Adjacency Matrix
+
+/* 1000 Small Graphs */
+1.  16.1324 - Adjacency Matrix, No Queue
+2.  17.9820 - Adjacency Matrix
+3.  19.8096 - Adjacency List
+4.  21.5852 - Compressed Sparse Row
+
+
+//***************************************************************************
+//                          Turing - GPU
+//***************************************************************************
+
+/* One Graph */
+
+/* 1024 threads per block */
+
+/* 1024 Vertices */
+1.  526.830 - Global Memory, 1 Block
+2.  552.408 - Shared Memory, 1 Block 
+
+/* 2048 Vertices */
+1.  1643.48 - Shared Memory, 2 Blocks
+2.  1670.25 - Global Memory, 2 Blocks
+
+/* 4096 Vertices */
+1.  6405.90 - Shared Memory, 3 Blocks
+2.  6426.17 - Global Memory, 3 Blocks
+
+/* 1000 small graphs */
+1.  9002.1237 - Shared Memory, 1 Block
+2.  9049.5202 - Global Memory, 1 Block  
+
+
+//***************************************************************************
+//                          Maverick2 GPU - GTX
+//***************************************************************************
+/* One Graph */
+
+/* 1024 threads per block */
+
+/* 1024 Vertices */
+1.  
+2.   
+
+/* 2048 Vertices */
+1.  
+2.  
+
+/* 4096 Vertices */
+1.  
+2.  
+
+//***************************************************************************
+//                          Maverick2 GPU - V100
+//***************************************************************************
+/* One Graph */
+
+/* 1024 threads per block */
+
+/* 1024 Vertices */
+1.  
+2.   
+
+/* 2048 Vertices */
+1.  
+2.  
+
+/* 4096 Vertices */
+1.  
+2.
