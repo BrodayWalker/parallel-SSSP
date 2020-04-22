@@ -4,7 +4,7 @@
 //   
 //  Turing
 //  Compilation:  /opt/cuda-9.0/bin/nvcc -arch=sm_37 -rdc=true dijkstra1B_shared.cu -o dijkstra1B_shared.exe
-//  Execution: ./dijkstra_shared.exe < input.txt > output.txt
+//  Execution: ./dijkstra1B_shared.exe < ~/5433/dijkstra/graphs/t_thou.txt > thou_output.txt
 //***************************************************************************
 
 #include <iostream>

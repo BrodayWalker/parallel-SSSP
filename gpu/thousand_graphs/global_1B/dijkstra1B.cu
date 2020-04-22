@@ -6,7 +6,7 @@
 //  Note: -rdc=true must be used as CUDA dynamic parallelism requires separate 
 //  compilation and linking
 //  Compilation:  /opt/cuda-9.0/bin/nvcc -arch=sm_37 -rdc=true dijkstra1B.cu -o dijkstra1B.exe
-//  Execution: ./dijkstra.exe < input.txt > output.txt
+//  Execution: ./dijkstra1B.exe < ~/5433/dijkstra/graphs/t_thou.txt > thou_output.txt
 //
 //  Maverick2 GTX queue (use submission script)
 //  Compilation: nvcc dijkstra1B.cu -o dijkstra1B.exe -std=c++11 -O3 -arch=compute_61 -code=sm_61 -rdc=true
