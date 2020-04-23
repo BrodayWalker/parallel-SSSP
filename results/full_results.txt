@@ -13,8 +13,8 @@
 4.  33.1051 - Adjacency Matrix
 
 /* 2048 Vertices */
-1.  54.7785 - Compressed Sparse Row
-2.  78.3576 - Adjacency List
+1.   54.779 - Compressed Sparse Row
+2.   78.358 - Adjacency List
 3.  102.393 - Adjacency Matrix, No Queue
 4.  124.872 - Adjacency Matrix
 
@@ -51,7 +51,7 @@
 1.  6405.90 - Shared Memory, 3 Blocks
 2.  6426.17 - Global Memory, 3 Blocks
 
-/* 1000 small graphs */
+/* 1000 Small Graphs */
 1.  9002.1237 - Shared Memory, 1 Block
 2.  9049.5202 - Global Memory, 1 Block  
 
@@ -75,6 +75,10 @@
 1.  2207.800 - Shared Memory, 3 Blocks
 2.  2233.780 - Global Memory, 3 Blocks
 
+/* 1000 Small Graphs, 1 Block */
+1.  477.369 - Global Memory
+2.  558.745 - Shared Memory
+
 //***************************************************************************
 //                          Maverick2 GPU - V100
 //***************************************************************************
@@ -83,13 +87,17 @@
 /* 1024 threads per block */
 
 /* 1024 Vertices */
-1.  96.192 - Global Memory, 1 Block
+1.   96.192 - Global Memory, 1 Block
 2.  100.478 - Shared Memory, 1 Block
 
 /* 2048 Vertices */
-1.  
-2.  
+1.  286.290 - Global Memory, 2 Blocks
+2.  298.199 - Shared Memory, 2 Blocks
 
 /* 4096 Vertices */
+1.  1223.15 - Global Memory, 3 Blocks
+2.  1247.39 - Sh
+
+/* 1000 Small Graphs, 1 Block */
 1.  
 2.
