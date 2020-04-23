@@ -96,8 +96,8 @@
 
 /* 4096 Vertices */
 1.  1223.15 - Global Memory, 3 Blocks
-2.  1247.39 - Sh
+2.  1247.39 - Shared Memory, 3 Blocks
 
 /* 1000 Small Graphs, 1 Block */
-1.  
-2.
+1.  601.475 - Shared Memory
+2.  624.862 - Global Memory
